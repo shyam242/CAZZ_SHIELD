@@ -35,19 +35,17 @@ class Settings(BaseSettings):
     JWT_REFRESH_TOKEN_EXPIRE_DAYS: int = 7
     
     # CORS
-    CORS_ORIGINS: list[str] | str = ["http://localhost:5173", "http://localhost:3000", "http://localhost:80"]
+    CORS_ORIGINS: list[str] | str = []
 
     @field_validator("CORS_ORIGINS", mode="before")
     def parse_cors_origins(cls, value):
-        default_origins = ["http://localhost:5173", "http://localhost:3000", "http://localhost:80"]
-
         if value is None:
-            return default_origins
+            return []
 
         if isinstance(value, str):
             value = value.strip()
             if not value:
-                return default_origins
+                return []
 
             if value.startswith("[") and value.endswith("]"):
                 normalized = value.replace("'", '"')
@@ -59,14 +57,14 @@ class Settings(BaseSettings):
                     inner = value[1:-1].strip()
                     if inner:
                         return [item.strip() for item in re.split(r"[;,\s]+", inner) if item.strip()]
-                    return default_origins
+                    return []
 
             return [origin.strip() for origin in re.split(r"[;,\s]+", value) if origin.strip()]
 
         if isinstance(value, (list, tuple)):
             return [str(item).strip() for item in value if str(item).strip()]
 
-        return default_origins
+        return []
     
     # Trust Engine Parameters (from PRD)
     TRUST_ALPHA: float = 0.05    # Success weight
