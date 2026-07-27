@@ -2,6 +2,7 @@
 CAZZ SHIELD — Configuration
 Enterprise AI Governance Platform
 """
+import json
 from pydantic import field_validator
 from pydantic_settings import BaseSettings
 from typing import Optional
@@ -38,7 +39,12 @@ class Settings(BaseSettings):
     @field_validator("CORS_ORIGINS", mode="before")
     def parse_cors_origins(cls, value):
         if isinstance(value, str):
-            return [origin.strip() for origin in value.split(",") if origin.strip()]
+            try:
+                parsed = json.loads(value)
+                if isinstance(parsed, list):
+                    return [str(item).strip() for item in parsed if str(item).strip()]
+            except json.JSONDecodeError:
+                return [origin.strip() for origin in value.split(",") if origin.strip()]
         return value
     
     # Trust Engine Parameters (from PRD)

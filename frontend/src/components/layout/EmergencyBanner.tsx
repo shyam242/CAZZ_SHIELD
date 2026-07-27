@@ -36,7 +36,7 @@ export const EmergencyBanner: React.FC = () => {
 
           <div className="flex items-center gap-3">
             <button
-              onClick={deactivateFleetStop}
+              onClick={() => deactivateFleetStop('Resolved emergency', true, true)}
               className="flex items-center gap-2 bg-emerald-600 hover:bg-emerald-500 text-white px-4 py-1.5 rounded-lg text-xs font-semibold shadow-lg transition-all border border-emerald-400/40 active:scale-95"
             >
               <CheckCircle2 className="w-4 h-4" />

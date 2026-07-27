@@ -28,7 +28,7 @@ export const Header: React.FC = () => {
         {/* Quick Fleet Stop Button */}
         {!isEmergencyActive ? (
           <button
-            onClick={() => activateFleetStop('Manual Operator Trigger', user?.full_name || 'Operator')}
+            onClick={() => activateFleetStop('Manual Operator Trigger', ['stop_agents', 'freeze_budgets'])}
             className="flex items-center gap-2 bg-rose-600/10 hover:bg-rose-600 text-rose-400 hover:text-white border border-rose-500/30 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all active:scale-95 shadow-sm"
           >
             <AlertOctagon className="w-4 h-4" />
