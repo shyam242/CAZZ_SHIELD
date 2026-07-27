@@ -1,0 +1,66 @@
+import React from "react";
+import { Routes, Route, Navigate } from "react-router-dom";
+import { useAuthStore } from "./store/authStore";
+import { AppLayout } from "./components/layout/AppLayout";
+import { LoginPage } from "./pages/LoginPage";
+import { DashboardPage } from "./pages/DashboardPage";
+import { AgentFleetPage } from "./pages/AgentFleetPage";
+import { AgentDetailsPage } from "./pages/AgentDetailsPage";
+import { TrustEnginePage } from "./pages/TrustEnginePage";
+import { RiskEnginePage } from "./pages/RiskEnginePage";
+import { PolicyEnginePage } from "./pages/PolicyEnginePage";
+import { PermissionEnginePage } from "./pages/PermissionEnginePage";
+import { BudgetEnginePage } from "./pages/BudgetEnginePage";
+import { GraphIntelligencePage } from "./pages/GraphIntelligencePage";
+import { AuditExplorerPage } from "./pages/AuditExplorerPage";
+import { GovernanceCopilotPage } from "./pages/GovernanceCopilotPage";
+import { IncidentCenterPage } from "./pages/IncidentCenterPage";
+import { EmergencyControlsPage } from "./pages/EmergencyControlsPage";
+import { PolicySimulatorPage } from "./pages/PolicySimulatorPage";
+import { ReportsPage } from "./pages/ReportsPage";
+import { SettingsPage } from "./pages/SettingsPage";
+
+const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
+  if (!isAuthenticated) {
+    return <Navigate to="/login" replace />;
+  }
+  return <>{children}</>;
+};
+
+export const App: React.FC = () => {
+  return (
+    <Routes>
+      <Route path="/login" element={<LoginPage />} />
+
+      <Route
+        path="/"
+        element={
+          <ProtectedRoute>
+            <AppLayout />
+          </ProtectedRoute>
+        }
+      >
+        <Route index element={<DashboardPage />} />
+        <Route path="agents" element={<AgentFleetPage />} />
+        <Route path="agents/:id" element={<AgentDetailsPage />} />
+        <Route path="trust" element={<TrustEnginePage />} />
+        <Route path="risk" element={<RiskEnginePage />} />
+        <Route path="policies" element={<PolicyEnginePage />} />
+        <Route path="permissions" element={<PermissionEnginePage />} />
+        <Route path="budget" element={<BudgetEnginePage />} />
+        <Route path="graph" element={<GraphIntelligencePage />} />
+        <Route path="audit" element={<AuditExplorerPage />} />
+        <Route path="copilot" element={<GovernanceCopilotPage />} />
+        <Route path="incidents" element={<IncidentCenterPage />} />
+        <Route path="emergency" element={<EmergencyControlsPage />} />
+        <Route path="simulator" element={<PolicySimulatorPage />} />
+        <Route path="reports" element={<ReportsPage />} />
+        <Route path="settings" element={<SettingsPage />} />
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Route>
+    </Routes>
+  );
+};
+
+export default App;
