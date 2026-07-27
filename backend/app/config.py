@@ -37,6 +37,8 @@ class Settings(BaseSettings):
     # CORS
     CORS_ORIGINS: list[str] | str = []
 
+    SKIP_AUTH: bool = False
+
     @field_validator("CORS_ORIGINS", mode="before")
     def parse_cors_origins(cls, value):
         if value is None:
