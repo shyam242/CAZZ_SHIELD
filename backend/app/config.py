@@ -34,18 +34,35 @@ class Settings(BaseSettings):
     JWT_REFRESH_TOKEN_EXPIRE_DAYS: int = 7
     
     # CORS
-    CORS_ORIGINS: list[str] = ["http://localhost:5173", "http://localhost:3000", "http://localhost:80"]
+    CORS_ORIGINS: list[str] | str = ["http://localhost:5173", "http://localhost:3000", "http://localhost:80"]
 
     @field_validator("CORS_ORIGINS", mode="before")
     def parse_cors_origins(cls, value):
+        default_origins = ["http://localhost:5173", "http://localhost:3000", "http://localhost:80"]
+
+        if value is None:
+            return default_origins
+
         if isinstance(value, str):
-            try:
-                parsed = json.loads(value)
-                if isinstance(parsed, list):
-                    return [str(item).strip() for item in parsed if str(item).strip()]
-            except json.JSONDecodeError:
-                return [origin.strip() for origin in value.split(",") if origin.strip()]
-        return value
+            value = value.strip()
+            if not value:
+                return default_origins
+
+            # Support JSON array strings and comma-separated values.
+            if value.startswith("[") or value.startswith("("):
+                try:
+                    parsed = json.loads(value)
+                    if isinstance(parsed, (list, tuple)):
+                        return [str(item).strip() for item in parsed if str(item).strip()]
+                except json.JSONDecodeError:
+                    pass
+
+            return [origin.strip() for origin in value.split(",") if origin.strip()]
+
+        if isinstance(value, (list, tuple)):
+            return [str(item).strip() for item in value if str(item).strip()]
+
+        return default_origins
     
     # Trust Engine Parameters (from PRD)
     TRUST_ALPHA: float = 0.05    # Success weight
