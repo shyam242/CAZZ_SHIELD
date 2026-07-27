@@ -3,6 +3,7 @@ CAZZ SHIELD — Configuration
 Enterprise AI Governance Platform
 """
 import json
+import re
 from pydantic import field_validator
 from pydantic_settings import BaseSettings
 from typing import Optional
@@ -48,16 +49,19 @@ class Settings(BaseSettings):
             if not value:
                 return default_origins
 
-            # Support JSON array strings and comma-separated values.
-            if value.startswith("[") or value.startswith("("):
+            if value.startswith("[") and value.endswith("]"):
+                normalized = value.replace("'", '"')
                 try:
-                    parsed = json.loads(value)
+                    parsed = json.loads(normalized)
                     if isinstance(parsed, (list, tuple)):
                         return [str(item).strip() for item in parsed if str(item).strip()]
                 except json.JSONDecodeError:
-                    pass
+                    inner = value[1:-1].strip()
+                    if inner:
+                        return [item.strip() for item in re.split(r"[;,\s]+", inner) if item.strip()]
+                    return default_origins
 
-            return [origin.strip() for origin in value.split(",") if origin.strip()]
+            return [origin.strip() for origin in re.split(r"[;,\s]+", value) if origin.strip()]
 
         if isinstance(value, (list, tuple)):
             return [str(item).strip() for item in value if str(item).strip()]
