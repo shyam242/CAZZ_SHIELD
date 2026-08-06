@@ -1,8 +1,6 @@
 import React from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
-import { useAuthStore } from "./store/authStore";
 import { AppLayout } from "./components/layout/AppLayout";
-import { LoginPage } from "./pages/LoginPage";
 import { DashboardPage } from "./pages/DashboardPage";
 import { AgentFleetPage } from "./pages/AgentFleetPage";
 import { AgentDetailsPage } from "./pages/AgentDetailsPage";
@@ -20,27 +18,10 @@ import { PolicySimulatorPage } from "./pages/PolicySimulatorPage";
 import { ReportsPage } from "./pages/ReportsPage";
 import { SettingsPage } from "./pages/SettingsPage";
 
-const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
-  if (!isAuthenticated) {
-    return <Navigate to="/login" replace />;
-  }
-  return <>{children}</>;
-};
-
 export const App: React.FC = () => {
   return (
     <Routes>
-      <Route path="/login" element={<LoginPage />} />
-
-      <Route
-        path="/"
-        element={
-          <ProtectedRoute>
-            <AppLayout />
-          </ProtectedRoute>
-        }
-      >
+      <Route path="/" element={<AppLayout />}>
         <Route index element={<DashboardPage />} />
         <Route path="agents" element={<AgentFleetPage />} />
         <Route path="agents/:id" element={<AgentDetailsPage />} />
