@@ -1,6 +1,8 @@
 import React from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
 import { AppLayout } from "./components/layout/AppLayout";
+import { ProtectedRoute } from "./components/auth/ProtectedRoute";
+import { LoginPage } from "./pages/LoginPage";
 import { DashboardPage } from "./pages/DashboardPage";
 import { AgentFleetPage } from "./pages/AgentFleetPage";
 import { AgentDetailsPage } from "./pages/AgentDetailsPage";
@@ -21,7 +23,16 @@ import { SettingsPage } from "./pages/SettingsPage";
 export const App: React.FC = () => {
   return (
     <Routes>
-      <Route path="/" element={<AppLayout />}>
+      <Route path="/login" element={<LoginPage />} />
+
+      <Route
+        path="/"
+        element={
+          <ProtectedRoute>
+            <AppLayout />
+          </ProtectedRoute>
+        }
+      >
         <Route index element={<DashboardPage />} />
         <Route path="agents" element={<AgentFleetPage />} />
         <Route path="agents/:id" element={<AgentDetailsPage />} />
