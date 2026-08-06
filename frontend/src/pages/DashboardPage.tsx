@@ -53,10 +53,20 @@ export const DashboardPage: React.FC = () => {
     loadData();
   }, [fetchAgents]);
 
-  const activeAgents = agents.filter((a) => a.status === "active");
-  const restrictedAgents = agents.filter((a) => a.status === "paused");
-  const quarantinedAgents = agents.filter((a) => a.status === "quarantined");
-  const offlineAgents = agents.filter((a) => a.status === "suspended" || a.status === "pending_review");
+  // NOTE: `agents` only holds the currently loaded page (fetchAgents uses
+  // page_size: 100), so fleet-wide counts must come from the /dashboard/kpis
+  // and /dashboard/charts endpoints, which aggregate across all agents —
+  // not from filtering this local page.
+  const totalAgents = kpis?.total_agents ?? 0;
+  const activeAgentsCount = kpis?.active_agents ?? 0;
+  const restrictedAgentsCount = kpis?.paused_agents ?? 0;
+  const quarantinedAgentsCount = kpis?.quarantined_agents ?? 0;
+  const offlineAgentsCount =
+    charts?.agent_status_breakdown
+      ?.filter((s: any) => s.status === "suspended" || s.status === "pending_review")
+      .reduce((sum: number, s: any) => sum + s.count, 0) ?? 0;
+
+  const pct = (count: number) => (totalAgents ? (count / totalAgents) * 100 : 0);
 
   const riskDistributionData = charts?.trust_distribution?.map((item: any, index: number) => ({
     name: item.label,
@@ -120,9 +130,9 @@ export const DashboardPage: React.FC = () => {
           <div className="flex justify-between items-start">
             <div>
               <p className="text-xs font-mono text-slate-400">ACTIVE AGENTS</p>
-              <h3 className="text-2xl font-bold text-white font-mono mt-1">{activeAgents.length.toLocaleString()}</h3>
+              <h3 className="text-2xl font-bold text-white font-mono mt-1">{activeAgentsCount.toLocaleString()}</h3>
               <span className="text-[11px] text-emerald-400 font-mono mt-1 inline-block">
-                {((activeAgents.length / agents.length) * 100).toFixed(1)}% of total fleet
+                {pct(activeAgentsCount).toFixed(1)}% of total fleet
               </span>
             </div>
             <div className="p-3 rounded-lg bg-emerald-500/10 text-emerald-400">
@@ -132,7 +142,7 @@ export const DashboardPage: React.FC = () => {
           <div className="mt-3 w-full bg-slate-800 h-1.5 rounded-full overflow-hidden">
             <div
               className="bg-emerald-500 h-full"
-              style={{ width: `${(activeAgents.length / agents.length) * 100}%` }}
+              style={{ width: `${pct(activeAgentsCount)}%` }}
             />
           </div>
         </motion.div>
@@ -144,9 +154,9 @@ export const DashboardPage: React.FC = () => {
           <div className="flex justify-between items-start">
             <div>
               <p className="text-xs font-mono text-slate-400">RESTRICTED AGENTS</p>
-              <h3 className="text-2xl font-bold text-amber-400 font-mono mt-1">{restrictedAgents.length.toLocaleString()}</h3>
+              <h3 className="text-2xl font-bold text-amber-400 font-mono mt-1">{restrictedAgentsCount.toLocaleString()}</h3>
               <span className="text-[11px] text-amber-400 font-mono mt-1 inline-block">
-                {((restrictedAgents.length / agents.length) * 100).toFixed(1)}% rate limit applied
+                {pct(restrictedAgentsCount).toFixed(1)}% rate limit applied
               </span>
             </div>
             <div className="p-3 rounded-lg bg-amber-500/10 text-amber-400">
@@ -156,7 +166,7 @@ export const DashboardPage: React.FC = () => {
           <div className="mt-3 w-full bg-slate-800 h-1.5 rounded-full overflow-hidden">
             <div
               className="bg-amber-500 h-full"
-              style={{ width: `${(restrictedAgents.length / agents.length) * 100}%` }}
+              style={{ width: `${pct(restrictedAgentsCount)}%` }}
             />
           </div>
         </motion.div>
@@ -168,9 +178,9 @@ export const DashboardPage: React.FC = () => {
           <div className="flex justify-between items-start">
             <div>
               <p className="text-xs font-mono text-slate-400">QUARANTINED AGENTS</p>
-              <h3 className="text-2xl font-bold text-red-400 font-mono mt-1">{quarantinedAgents.length.toLocaleString()}</h3>
+              <h3 className="text-2xl font-bold text-red-400 font-mono mt-1">{quarantinedAgentsCount.toLocaleString()}</h3>
               <span className="text-[11px] text-red-400 font-mono mt-1 inline-block">
-                {((quarantinedAgents.length / agents.length) * 100).toFixed(1)}% isolation active
+                {pct(quarantinedAgentsCount).toFixed(1)}% isolation active
               </span>
             </div>
             <div className="p-3 rounded-lg bg-red-500/10 text-red-400">
@@ -180,7 +190,7 @@ export const DashboardPage: React.FC = () => {
           <div className="mt-3 w-full bg-slate-800 h-1.5 rounded-full overflow-hidden">
             <div
               className="bg-red-500 h-full"
-              style={{ width: `${(quarantinedAgents.length / agents.length) * 100}%` }}
+              style={{ width: `${pct(quarantinedAgentsCount)}%` }}
             />
           </div>
         </motion.div>
@@ -192,9 +202,9 @@ export const DashboardPage: React.FC = () => {
           <div className="flex justify-between items-start">
             <div>
               <p className="text-xs font-mono text-slate-400">OFFLINE AGENTS</p>
-              <h3 className="text-2xl font-bold text-slate-400 font-mono mt-1">{offlineAgents.length.toLocaleString()}</h3>
+              <h3 className="text-2xl font-bold text-slate-400 font-mono mt-1">{offlineAgentsCount.toLocaleString()}</h3>
               <span className="text-[11px] text-slate-400 font-mono mt-1 inline-block">
-                {((offlineAgents.length / agents.length) * 100).toFixed(1)}% scheduled maintenance
+                {pct(offlineAgentsCount).toFixed(1)}% scheduled maintenance
               </span>
             </div>
             <div className="p-3 rounded-lg bg-slate-800 text-slate-400">
@@ -204,7 +214,7 @@ export const DashboardPage: React.FC = () => {
           <div className="mt-3 w-full bg-slate-800 h-1.5 rounded-full overflow-hidden">
             <div
               className="bg-slate-500 h-full"
-              style={{ width: `${(offlineAgents.length / agents.length) * 100}%` }}
+              style={{ width: `${pct(offlineAgentsCount)}%` }}
             />
           </div>
         </motion.div>
@@ -284,7 +294,7 @@ export const DashboardPage: React.FC = () => {
             <ShieldAlert className="w-4 h-4 text-amber-400" />
             Fleet Risk Distribution
           </h3>
-          <p className="text-xs text-slate-400 font-mono mb-4">Risk scoring across {agents.length} active agents</p>
+          <p className="text-xs text-slate-400 font-mono mb-4">Risk scoring across {totalAgents.toLocaleString()} active agents</p>
           <div className="h-48 w-full">
             <ResponsiveContainer width="100%" height="100%">
               <PieChart>
